@@ -14,9 +14,9 @@ func ProductRoutes(r *gin.Engine, db *pgxpool.Pool) {
 	productService := services.NewProductService(productRepo)
 	productHandler := handlers.NewProductHandler(productService)
 
-	r.GET("/api/product", gin.WrapF(productHandler.HandleProducts))
-	r.POST("/api/product", gin.WrapF(productHandler.HandleProducts))
-	r.GET("/api/product/:id", gin.WrapF(productHandler.HandleProductByID))
-	r.PUT("/api/product/:id", gin.WrapF(productHandler.HandleProductByID))
-	r.DELETE("/api/product/:id", gin.WrapF(productHandler.HandleProductByID))
+	r.GET("/api/product", productHandler.HandleProducts)
+	r.POST("/api/product", productHandler.HandleProducts)
+	r.GET("/api/product/:id", productHandler.HandleProductByID)
+	r.PUT("/api/product/:id", productHandler.HandleProductByID)
+	r.DELETE("/api/product/:id", productHandler.HandleProductByID)
 }

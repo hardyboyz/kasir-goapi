@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"myshop-api/models"
+	"strconv"
 
 	"github.com/jackc/pgx/v5/pgxpool"
 )
@@ -46,7 +47,7 @@ func (repo *ProductRepository) Create(product *models.Product) error {
 
 // GetByID - ambil produk by ID
 func (repo *ProductRepository) GetByID(id int) (*models.Product, error) {
-	query := "SELECT products.id, products.name, products.price, products.stock, products.category_id, categories.name, categories.description FROM products LEFT JOIN categories ON products.category_id = categories.id WHERE products.id = $1"
+	query := "SELECT A.id, A.name, A.price, A.stock, A.category_id, B.name, B.description FROM products A LEFT JOIN categories B ON A.category_id = B.id WHERE A.id = $1"
 
 	var p models.Product
 	var c models.Category
@@ -88,4 +89,40 @@ func (repo *ProductRepository) Delete(id int) error {
 	}
 
 	return nil
+}
+
+func (repo *ProductRepository) SearchProducts(name string, categoryID int) ([]models.Product, error) {
+	query := "SELECT products.id, products.name, price, stock, category_id, categories.id, categories.name, description FROM products LEFT JOIN categories ON products.category_id = categories.id WHERE 1=1"
+	args := []interface{}{}
+	argCount := 0
+
+	if name != "" {
+		argCount++
+		query += " AND products.name ILIKE $" + strconv.Itoa(argCount)
+		args = append(args, "%"+name+"%")
+	}
+
+	if categoryID > 0 {
+		argCount++
+		query += " AND products.category_id = $" + strconv.Itoa(argCount)
+		args = append(args, categoryID)
+	}
+
+	rows, err := repo.db.Query(context.Background(), query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	products := make([]models.Product, 0)
+	for rows.Next() {
+		var p models.Product
+		err := rows.Scan(&p.ID, &p.Name, &p.Price, &p.Stock, &p.CategoryID, &p.Category.ID, &p.Category.Name, &p.Category.Description)
+		if err != nil {
+			return nil, err
+		}
+		products = append(products, p)
+	}
+
+	return products, nil
 }

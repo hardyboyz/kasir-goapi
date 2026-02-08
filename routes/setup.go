@@ -8,4 +8,5 @@ import (
 func SetupRoutes(r *gin.Engine, db *pgxpool.Pool) {
 	CategoryRoutes(r, db)
 	ProductRoutes(r, db)
+	TransactionRoutes(r, db)
 }

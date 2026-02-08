@@ -32,3 +32,7 @@ func (s *ProductService) Update(product *models.Product) error {
 func (s *ProductService) Delete(id int) error {
 	return s.repo.Delete(id)
 }
+
+func (s *ProductService) SearchProducts(name string, categoryID int) ([]models.Product, error) {
+	return s.repo.SearchProducts(name, categoryID)
+}
